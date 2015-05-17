@@ -25,6 +25,23 @@
     this.rows = [];
   }
 
+  ListView.prototype.filterBy = function(field, value) {
+    this.rows.forEach(function(rowView) {
+      var fieldContainsValue = false;
+      if (field === "text") {
+        var itemField = rowView.item[field].toLowerCase();
+        fieldContainsValue = itemField.indexOf(value.toLowerCase()) !== -1;
+      }
+      if (fieldContainsValue) {
+        rowView.tag.show();
+      } else {
+        // console.log("making sure " + rowView.item.number + "is hidden");
+        rowView.tag.hide();
+      }
+      // rowView.tag.hidden = !fieldContainsValue;
+    });
+  };
+
   ListView.prototype.render = function() {
     if (this.list.length !== this.rows.length) {
       this.tag.empty();
@@ -41,10 +58,15 @@
   };
 
   $(document).ready(function() {
-    $("#item-details").click(function(){$("#item-details").fadeOut();});
     var listView = new ListView()
     $("#the-list").append(listView.tag);
     listView.render();
+
+    $("#item-details").click(function(){$("#item-details").fadeOut();});
+    $("#text-search").keyup(function() {
+      listView.filterBy("text", $("#text-search").val());
+    });
+
     $.ajax("/list/json",
            {dataType: "json",
             success: function(data) {
