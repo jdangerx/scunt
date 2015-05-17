@@ -12,7 +12,11 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
-from secrets import *
+
+import datetime
+from pytz import timezone
+
+from scunt.secrets import *
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -34,6 +38,8 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'taggit',
+    'scavlist',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -84,7 +90,7 @@ DATABASES = {
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'America/Chicago'
 
 USE_I18N = True
 
@@ -97,3 +103,6 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
 
 STATIC_URL = '/static/'
+
+JUDGMENT = datetime.datetime(2015, 5, 10, 12, tzinfo= timezone("America/Chicago"))
+LIST_RELEASE = datetime.datetime(2015, 5, 7, 0, tzinfo= timezone("America/Chicago"))
