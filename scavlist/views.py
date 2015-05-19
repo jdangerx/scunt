@@ -20,3 +20,7 @@ def list_json(request):
 
 def view_list(request):
     return render(request, "viewlist.html")
+
+
+def run_jasmine(request, js_name):
+    return render(request, "jasmine-runner.html", {"js_name": js_name})
