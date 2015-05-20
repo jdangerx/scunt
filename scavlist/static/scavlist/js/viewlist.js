@@ -39,7 +39,6 @@ ListView.prototype.loadFullList = function() {
 };
 
 ListView.prototype.filterBy = function(field, value) {
-  console.log("filtering by " + field + ", " + value);
   this.rows.forEach(function(rowView) {
     var fieldContainsValue = false;
     var itemField = "";
@@ -50,6 +49,10 @@ ListView.prototype.filterBy = function(field, value) {
         itemField = rowView.item[field];
       }
       fieldContainsValue = itemField.indexOf(value) !== -1;
+    } else if (field == "points") {
+      var min_val = rowView.item.min_val;
+      var max_val = rowView.item.min_val;
+      fieldContainsValue = min_val >= value[0] && max_val <= value[1];
     }
     rowView.tag[0].hidden = !fieldContainsValue;
   });
@@ -78,6 +81,19 @@ function initList() {
   $("#item-details").click(function(){$("#item-details").fadeOut();});
   $("#text-search").keyup(function() {
     listView.filterBy("text", $("#text-search").val());
+  });
+
+  $(function() {
+    $("#points-search").slider({
+      range: true,
+      min: 0,
+      max: 250,
+      values: [0, 250],
+      slide: function updatePointsDisplay(evt, ui) {
+        listView.filterBy("points", ui.values);
+        $("#points-range-display").html(ui.values[0] + " - " + ui.values[1]);
+      }
+    });
   });
   return listView;
 }

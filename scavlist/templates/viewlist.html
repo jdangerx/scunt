@@ -6,8 +6,11 @@
 <title>The 2015 University of Chicago Scavenger Hunt List</title>
 
 <link rel="stylesheet" type="text/css" href="/static/scavlist/css/viewlist.css"/>
-<link rel="stylesheet" type="text/css" media="max-width:600px"href="/static/scavlist/viewlist-mobile.css"/>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script> 
+<link rel="stylesheet" type="text/css" media="max-width:600px" href="/static/scavlist/css/viewlist-mobile.css"/>
+<link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+<script src="/static/scavlist/lib/jquery-ui-1.11.4/jquery-ui.min.js"></script>
 <script src="/static/scavlist/js/viewlist.js"></script>
 
 </head>
@@ -16,7 +19,9 @@
 
 <h2>The 2015 University of Chicago Scavenger Hunt List</h2>
 
-Text search: <input id="text-search"></div>
+Text search: <input id="text-search"></input>
+Points search: <span id="points-range-display">0 - 250</span>
+<div id="points-search"></div>
 <div id="item-details" hidden="true"></div>
 <div id="the-list"></div>
 </body>
