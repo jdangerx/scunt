@@ -1,10 +1,51 @@
 "use strict";
 
+(function djangAjaxScience() {
+  $.ajaxSetup({
+    beforeSend: function(xhr, settings) {
+      function getCookie(name) {
+        var cookieValue = null;
+        if (document.cookie && document.cookie != '') {
+          var cookies = document.cookie.split(';');
+          for (var i = 0; i < cookies.length; i++) {
+            var cookie = $.trim(cookies[i]);
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) == (name + '=')) {
+              cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+              break;
+            }
+          }
+        }
+        return cookieValue;
+      }
+      xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+    }
+  });
+})();
+
 // (function(){
 function RowView(item) {
   this.item = item;
   this.tag = $("<tr>");
   this.tag.click(this.showDetails.bind(this));
+  this.signUpBtn = $("<td class='claim-btn'>Sign up!</td>");
+
+  this.signUpBtn.click(function(evt) {
+    evt.stopPropagation();
+    console.log("signing up for item #" + this.item.number);
+    $.ajax({
+      url: "/list/claim/"+this.item.number,
+      method: "POST",
+      data: $("#claim-form").serialize(),
+      dataType: "json",
+      success: function(data) {
+        console.log("Success!", data);
+      },
+      error: function(xhr, textStatus, errorThrown) {
+        console.log("Error!", xhr, textStatus, errorThrown);
+      }
+    });
+  }.bind(this));
 }
 
 RowView.prototype.showDetails = function() {
@@ -16,6 +57,7 @@ RowView.prototype.render = function() {
   this.tag.append($("<td class='item-number'>" + this.item.number + "</td>"));
   this.tag.append($("<td class='item-text'>" + this.item.text + "</td>"));
   this.tag.append($("<td class='item-point-txt'>" + this.item.point_txt + "</td>"));
+  this.tag.append(this.signUpBtn);
 };
 
 function ListView() {
@@ -86,9 +128,9 @@ function initList() {
   $(function() {
     $("#points-search").slider({
       range: true,
-      min: 0,
+      min: -1,
       max: 250,
-      values: [0, 250],
+      values: [-1, 250],
       slide: function updatePointsDisplay(evt, ui) {
         listView.filterBy("points", ui.values);
         $("#points-range-display").html(ui.values[0] + " - " + ui.values[1]);

@@ -2,14 +2,14 @@ from django.db import models
 from django.contrib.auth.models import User
 from taggit.managers import TaggableManager
 
-from scunt.settings import JUDGMENT, LIST_RELEASE
+from scunt.settings import JUDGMENT
 
 
 class ContactInfo(models.Model):
     name = models.TextField(null=False)
     email = models.TextField(null=False)
-    phone = models.TextField(null=False)
-    location = models.TextField(null=True)
+    phone = models.TextField(null=True, blank=True)
+    location = models.TextField(null=True, blank=True)
 
 
 class PageCaptain(models.Model):
@@ -32,7 +32,11 @@ class Item(models.Model):
     location = models.TextField()
     tags = TaggableManager()
     contacts = models.ManyToManyField(ContactInfo)
-    updated = models.DateTimeField(null=True, auto_now=True)
+    updated = models.DateTimeField(null=True, blank=True, auto_now=True)
+
+    @property
+    def claimed(self):
+        return len(self.contacts) > 0
 
     def __repr__(self):
         return "<Item {number}: {text} {point_txt}>".format(**self.__dict__)
