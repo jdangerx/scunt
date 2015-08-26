@@ -62,7 +62,7 @@ section = do
 page :: Parsec String st String
 page = do
   -- head <- count 50 anyChar <?> "getting head"
-  firstItem <- (try (spaces *> string "\\item " *> count 20 anyChar)) <|> count 1 anyChar
+  firstItem <- (try (spaces *> string "\\item " *> manyTill (try anyChar) (try (char '\n')))) <|> count 1 anyChar
   -- manyTill anyChar (try ((string "\\newpage") <?> "new page") <|>
                     -- ((eof *> return "") <?> "eof"))
   manyTill anyChar (try ((string "\\newpage") <?> "new page") <|>
