@@ -1,5 +1,7 @@
 module ListParser where
 
+import Control.Monad
+
 import Text.Parsec
 import Data.Time.LocalTime
 import Data.Time.Calendar (fromGregorian)
@@ -12,21 +14,22 @@ import Data.Time.Calendar (fromGregorian)
 chiTZ :: TimeZone
 chiTZ = TimeZone (-360) False "CST"
 
-data Section = Section String [Page]
+data Section = Section {
+  name :: String,
+  pages :: [Page]
+  }
                deriving (Show)
 
-data Page = Page Int [Item]
-               deriving (Show)
+data Page = Page {
+  num :: Int,
+  items :: [Item]
+  }
+          deriving (Show)
 
 data Item = Item {
   text :: String,
-  -- lb :: PointValue,
-  -- ub :: PointValue,
   points :: String,
-  early :: Bool,
-  -- deadline :: Maybe ZonedTime,
-  status :: Status,
-  location :: Maybe String
+  early :: Bool
   }
                deriving (Show)
 
@@ -38,26 +41,57 @@ data Status = NotStarted
                deriving (Show)
 
 theList :: Parsec String st [Section]
-theList = manyTill anyChar (string "\\section*") *> many section
+theList =
+  -- filter ((== "Items") . name) <$>
+  (manyTill anyChar (try $ string "\\section*") *>
+   sepBy section (try $ string "\\section*"))
 
 section :: Parsec String st Section
 section = do
-  name <- between (char '{') (char '}') (many anyChar)
-  pages <- manyTill page (string "\\section*" <|> string "\\end{document}")
+  name <- between (char '{') (char '}') (many (noneOf "}"))
+  pages <- sepBy page (try (string "\\newpage"))
+  string "\\end{document}"
+  spaces
   return $ Section name pages
 
 page :: Parsec String st Page
-page = manyTill item (string "\\newpage") >>= \items -> return $ Page 1 items
+page = do
+  items' <- sepBy item (try (spaces *> string "\\item"))
+  return $ Page 1 items'
 
 item :: Parsec String st Item
 item = do
-  string "\\item"
-  text <- manyTill anyChar (lookAhead $ char '[')
-  points <- between (char '[') (char ']') (many $ noneOf "]")
   spaces
-  early <- option False (string "\\clock" *> return True)
-  return Item  {text = text,
-                points = points,
-                early = early,
-                status = NotStarted,
-                location = Nothing}
+  t <- manyTill anyChar (lookAhead $ char '[')
+  p <- between (char '[') (char ']') (many $ noneOf "]")
+  spaces
+  e <- option False (try $ string "\\clock" *> return True)
+  option "" (between (char '$') (char '$') (many $ noneOf "$"))
+  spaces
+  return Item  {text = t,
+                points = p,
+                early = e
+                }
+
+itemTextEarly :: String
+itemTextEarly = "\\item Dance, monkey, dance! [0 points] \\clock"
+
+itemText :: String
+itemText = "\\item Dance, monkey, dance! [0 points]"
+
+testParseItem :: String -> Either ParseError Item
+testParseItem = parse item ""
+
+pageText :: String
+pageText = join $ replicate 2 (itemText ++ "\n\n")
+
+pagesText :: String
+pagesText = join (replicate 2 (itemText ++ "\n\n") ++ ["\\newpage\n\n"] ++
+                  replicate 2 (itemTextEarly ++ "\n\n") ++ ["\\end{list}"]
+                 )
+
+testParsePage :: String -> Either ParseError Page
+testParsePage = parse page ""
+
+sectionText :: String
+sectionText = "{section name}\n\n" ++ pagesText ++ "\n\n\\section*{next section}"
