@@ -37,23 +37,34 @@ data Status = NotStarted
 listLoc :: String
 listLoc = "/home/john/phoenixparsing/tex4scavvies_2015.tex"
 
-wholeFile :: Parsec String st [String]
+wholeFile :: Parsec String st [[String]]
 wholeFile =
   do
     preamble
     string "\\section*"
-    names <- many section
+    count 3 section
+    pages <- many section
     -- sectionNames <- sepBy section (lookAhead $ try $ (string "\\section*" <?> "section header"))
     -- eof
-    return names
+    return pages
 
 preamble :: Parsec String st String
 preamble = manyTill anyChar (lookAhead $ try $ string "\\section*")
 
-section :: Parsec String st String
+section :: Parsec String st [String]
 section = do
   name <- between (char '{') (char '}') (many $ noneOf "{}")
-  manyTill anyChar (try (string "\\section*" <|>
+  pages <- manyTill page (try (string "\\section*" <|>
                          (eof *> return "") <?>
                          "next section start or end of document"))
-  return name
+  return $ name : pages
+
+page :: Parsec String st String
+page = do
+  -- head <- count 50 anyChar <?> "getting head"
+  firstItem <- (try (spaces *> string "\\item " *> count 20 anyChar)) <|> count 1 anyChar
+  -- manyTill anyChar (try ((string "\\newpage") <?> "new page") <|>
+                    -- ((eof *> return "") <?> "eof"))
+  manyTill anyChar (try ((string "\\newpage") <?> "new page") <|>
+                    ((eof *> return "") <?> "eof"))
+  return firstItem
