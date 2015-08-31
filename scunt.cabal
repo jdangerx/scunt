@@ -59,7 +59,13 @@ executable scunt
   -- Other library packages from which modules are imported.
   build-depends:       base >=4.8 && <4.9,
                        scotty >=0.10 && <0.11,
-                       text
+                       text,
+                       aeson,
+                       bytestring,
+                       persistent,
+                       persistent-sqlite,
+                       persistent-template,
+                       transformers
   
   -- Directories containing source files.
   -- hs-source-dirs:      
